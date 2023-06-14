@@ -36,6 +36,7 @@ func (ah *AwsHelper) New() {
 			Region: aws.String(ah.Region),
 		},
 	})
+
 	_, err = sess.Config.Credentials.Get()
 	if err != nil {
 		exitErrorf("Unable to load credentials, %v", err)
@@ -82,12 +83,6 @@ func (ah *AwsHelper) checkIfFileExists(svc *s3.S3, uniqueID string) (bool, error
 
 // Upload the object to S3 using the unique identifier as the key
 func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
-	// file, err := os.Open(data.objectPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer file.Close()
-	// S3 service client the Upload manager will use.
 	svc := s3.New(ah.Session)
 	exist, err := ah.checkIfFileExists(svc, uniqueID)
 	if exist {
@@ -97,7 +92,6 @@ func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
 
 	// Create an uploader with S3 client and default options
 	uploader := s3manager.NewUploaderWithClient(svc)
-	// Upload input parameters
 	upParams := &s3manager.UploadInput{
 		Bucket: aws.String(ah.Bucket),
 		Key:    aws.String(uniqueID),
@@ -115,7 +109,6 @@ func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
 // Download get ObjectData from S3
 func (ah *AwsHelper) Download(uniqueID string) {
 	svc := s3.New(ah.Session)
-	// Retrieve the object from S3 using the unique identifier
 	output, err := svc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(ah.Bucket),
 		Key:    aws.String(uniqueID),

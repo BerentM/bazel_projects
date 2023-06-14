@@ -52,6 +52,8 @@ func (p *ImageProcessor) gridToBytes(grid [][]color.Color) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
+// DownscaleImage reduce resolution of the Image
+// based on https://go-recipes.dev/more-working-with-images-in-go-30b11ab2a9f0
 func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 	var grid [][]color.Color
 	img, err := png.Decode(bytes.NewReader(data))
