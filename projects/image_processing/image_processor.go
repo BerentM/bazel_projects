@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -15,10 +16,9 @@ import (
 
 // ImageProcessor object hashing
 type ImageProcessor struct {
-	data       []byte
-	scale      float64
-	objectPath string
-	uniqueID   string
+	img      []byte
+	scale    float64
+	uniqueID string
 }
 
 func (p *ImageProcessor) resize(grid [][]color.Color) [][]color.Color {
@@ -73,12 +73,23 @@ func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 
 	resized := p.resize(grid)
 	bytes, err := p.gridToBytes(resized)
-	p.data = bytes
+	p.img = bytes
 	return bytes, err
 }
 
-func (p *ImageProcessor) readFile() ([]byte, error) {
-	file, err := os.Open(p.objectPath)
+// Process downscale and generateUniqueID for passed image
+func (p *ImageProcessor) Process(img []byte) {
+	data, err := p.DownscaleImage(img)
+	if err != nil {
+		log.Fatal(err)
+	}
+	p.generateUniqueID(data)
+	p.img = data
+	fmt.Println(p.uniqueID)
+}
+
+func (p *ImageProcessor) readFile(path string) ([]byte, error) {
+	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
