@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -60,6 +61,25 @@ func (ah *AwsHelper) CheckBuckets() {
 	}
 }
 
+func (ah *AwsHelper) checkIfFileExists(svc *s3.S3, uniqueID string) (bool, error) {
+	_, err := svc.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(ah.Bucket),
+		Key:    aws.String(uniqueID),
+	})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case "NotFound": // s3.ErrCodeNoSuchKey does not work, aws is missing this error code so we hardwire a string
+				return false, nil
+			default:
+				return false, err
+			}
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 // Upload the object to S3 using the unique identifier as the key
 func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
 	// file, err := os.Open(data.objectPath)
@@ -69,6 +89,11 @@ func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
 	// defer file.Close()
 	// S3 service client the Upload manager will use.
 	svc := s3.New(ah.Session)
+	exist, err := ah.checkIfFileExists(svc, uniqueID)
+	if exist {
+		fmt.Println("File already exist in S3")
+		return
+	}
 
 	// Create an uploader with S3 client and default options
 	uploader := s3manager.NewUploaderWithClient(svc)
