@@ -1,4 +1,4 @@
-module berentm/hash_image
+module berentm/image_processing
 
 go 1.19
 
