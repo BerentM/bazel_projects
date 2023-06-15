@@ -21,6 +21,11 @@ type ImageProcessor struct {
 	uniqueID string
 }
 
+// New Initialize new image processor
+func (p *ImageProcessor) New(scale float64) {
+	p.scale = scale
+}
+
 func (p *ImageProcessor) resize(grid [][]color.Color) [][]color.Color {
 	xlen, ylen := int(float64(len(grid))*p.scale), int(float64(len(grid[0]))*p.scale)
 	resized := make([][]color.Color, xlen)
@@ -52,13 +57,9 @@ func (p *ImageProcessor) gridToBytes(grid [][]color.Color) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-// DownscaleImage reduce resolution of the Image
-// based on https://go-recipes.dev/more-working-with-images-in-go-30b11ab2a9f0
-func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
+// bytesToGrid create grid of pixels
+func (p *ImageProcessor) imageToGrid(img image.Image) [][]color.Color {
 	var grid [][]color.Color
-	img, err := png.Decode(bytes.NewReader(data))
-
-	// create grid of pixels
 	size := img.Bounds().Size()
 	for i := 0; i < size.X; i++ {
 		var y []color.Color
@@ -67,10 +68,17 @@ func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 		}
 		grid = append(grid, y)
 	}
+	return grid
+}
+
+// DownscaleImage reduce resolution of the Image
+// based on https://go-recipes.dev/more-working-with-images-in-go-30b11ab2a9f0
+func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
+	img, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	grid := p.imageToGrid(img)
 	resized := p.resize(grid)
 	bytes, err := p.gridToBytes(resized)
 	p.img = bytes
