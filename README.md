@@ -1,3 +1,13 @@
+## USEFULL COMMANDS
+1. run image processing project
+```bazel run //projects/image_processing:image_processing```
+2. test projects
+```bazel test //...```
+3. build projects
+```bazel build //...```
+
+
+
 ## BAZEL / GAZELLE
 
 1. add gazelle config to WORKSPACE.bazel: https://github.com/bazelbuild/rules_go#generating-build-files
