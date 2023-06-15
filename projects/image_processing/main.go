@@ -11,7 +11,7 @@ func main() {
 	aws.New()
 	aws.CheckBuckets()
 
-	paths := []string{"images/test_image.png"}
+	paths := []string{"projects/image_processing/images/test_image.png"}
 	imgProcessor := ImageProcessor{scale: 0.9}
 
 	for _, path := range paths {

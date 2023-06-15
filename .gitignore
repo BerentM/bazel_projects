@@ -1,2 +1,4 @@
 bazel-*
 .DS-Store
+projects/image_processing/images/output*
+projects/image_processing/image_processing
