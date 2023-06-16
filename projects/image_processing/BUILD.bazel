@@ -7,16 +7,17 @@ go_library(
         "image_processor.go",
         "main.go",
     ],
+    data = glob(["images/**"]),
     importpath = "projects/image_processing",
     visibility = ["//visibility:private"],
     deps = [
-        "@com_github_aws_aws_sdk_go//aws:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws/awserr:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
-        "@com_github_aws_aws_sdk_go//service/s3:go_default_library",
-        "@com_github_aws_aws_sdk_go//service/s3/s3manager:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws",
+        "@com_github_aws_aws_sdk_go//aws/awserr",
+        "@com_github_aws_aws_sdk_go//aws/session",
+        "@com_github_aws_aws_sdk_go//service/s3",
+        "@com_github_aws_aws_sdk_go//service/s3/s3manager",
+        "@com_github_aws_aws_sdk_go//service/sts",
     ],
-    data = glob(["images/**"]),
 )
 
 go_binary(

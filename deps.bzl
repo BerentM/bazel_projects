@@ -4,8 +4,8 @@ def go_dependencies():
     go_repository(
         name = "com_github_aws_aws_sdk_go",
         importpath = "github.com/aws/aws-sdk-go",
-        sum = "h1:z/ptheJvINaIAsKXthxONM+toTKw2pxyk700Hfm6yUw=",
-        version = "v1.44.281",
+        sum = "h1:ObMaIvdhHJM2sIrbcljd7muHBaFb+Kp/QsX6iflGDg4=",
+        version = "v1.44.283",
     )
     go_repository(
         name = "com_github_davecgh_go_spew",

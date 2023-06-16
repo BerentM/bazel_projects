@@ -1,9 +1,12 @@
 ## USEFULL COMMANDS
-1. run image processing project
+
+1. update deps, -from_file need point to go.mod file
+```bazel run //:gazelle -- update-repos -from_file=projects/image_processing/go.mod -to_macro=deps.bzl%go_dependencies```
+2. run image processing project
 ```bazel run //projects/image_processing:image_processing```
-2. test projects
+3. test projects
 ```bazel test //...```
-3. build projects
+4. build projects
 ```bazel build //...```
 
 
