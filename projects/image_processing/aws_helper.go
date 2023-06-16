@@ -2,14 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 func exitErrorf(msg string, args ...interface{}) {
@@ -22,7 +22,7 @@ type AwsHelper struct {
 	Region             string `yaml:"Region"`
 	Bucket             string `yaml:"Bucket"`
 	CredentialsProfile string `yaml:"CredentialsProfile"`
-	Session            *session.Session
+	Config             aws.Config
 }
 
 // New initialize AWS session
@@ -30,26 +30,21 @@ func (ah *AwsHelper) New() {
 	ah.Region = "eu-central-1"
 	ah.Bucket = "dtmx-images-poc"
 	ah.CredentialsProfile = "dtmx-images"
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Profile: ah.CredentialsProfile,
-		Config: aws.Config{
-			Region: aws.String(ah.Region),
-		},
-	})
-
-	_, err = sess.Config.Credentials.Get()
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithSharedConfigProfile(ah.CredentialsProfile),
+	)
 	if err != nil {
 		exitErrorf("Unable to load credentials, %v", err)
 	}
-	ah.Session = sess
+	ah.Config = cfg
 }
 
 // CheckBuckets list all buckets
 func (ah *AwsHelper) CheckBuckets() {
 	// Create S3 service client
-	svc := s3.New(ah.Session)
+	svc := s3.NewFromConfig(ah.Config)
 
-	result, err := svc.ListBuckets(nil)
+	result, err := svc.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
 		exitErrorf("Unable to list buckets, %v", err)
 	}
@@ -58,32 +53,25 @@ func (ah *AwsHelper) CheckBuckets() {
 
 	for _, b := range result.Buckets {
 		fmt.Printf("* %s created on %s\n",
-			aws.StringValue(b.Name), aws.TimeValue(b.CreationDate))
+			*b.Name, b.CreationDate)
 	}
 }
 
-func (ah *AwsHelper) checkIfFileExists(svc *s3.S3, uniqueID string) (bool, error) {
-	_, err := svc.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(ah.Bucket),
-		Key:    aws.String(uniqueID),
-	})
+func (ah *AwsHelper) checkIfFileExists(svc *s3.Client, uniqueID string) (bool, error) {
+	input := &s3.HeadObjectInput{
+		Bucket: &ah.Bucket,
+		Key:    &uniqueID,
+	}
+	_, err := svc.HeadObject(context.TODO(), input)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case "NotFound": // s3.ErrCodeNoSuchKey does not work, aws is missing this error code so we hardwire a string
-				return false, nil
-			default:
-				return false, err
-			}
-		}
-		return false, err
+		return false, nil
 	}
 	return true, nil
 }
 
 // Upload the object to S3 using the unique identifier as the key
 func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
-	svc := s3.New(ah.Session)
+	svc := s3.NewFromConfig(ah.Config)
 	exist, err := ah.checkIfFileExists(svc, uniqueID)
 	if exist {
 		fmt.Println("File already exist in S3")
@@ -91,32 +79,31 @@ func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
 	}
 
 	// Create an uploader with S3 client and default options
-	uploader := s3manager.NewUploaderWithClient(svc)
-	upParams := &s3manager.UploadInput{
-		Bucket: aws.String(ah.Bucket),
-		Key:    aws.String(uniqueID),
+	result, err := svc.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &ah.Bucket,
+		Key:    &uniqueID,
 		Body:   bytes.NewReader(byteFile),
+	})
+	if err != nil {
+		log.Printf("Couldn't upload file to %v:%v. Here's why: %v\n",
+			ah.Bucket, uniqueID, err)
 	}
 
 	// Perform an upload.
-	result, err := uploader.Upload(upParams)
-	if err != nil {
-		exitErrorf("Unable to upload file, %v", err)
-	}
-	fmt.Println(result.Location)
+	fmt.Println(result)
 }
 
-// Download get ObjectData from S3
-func (ah *AwsHelper) Download(uniqueID string) {
-	svc := s3.New(ah.Session)
-	output, err := svc.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(ah.Bucket),
-		Key:    aws.String(uniqueID),
-	})
-	if err != nil {
-		exitErrorf("Unable to download file, %v", err)
-	}
+// // Download get ObjectData from S3
+// func (ah *AwsHelper) Download(uniqueID string) {
+// 	svc := s3.New(ah.Session)
+// 	output, err := svc.GetObject(&s3.GetObjectInput{
+// 		Bucket: ah.Bucket,
+// 		Key:    uniqueID,
+// 	})
+// 	if err != nil {
+// 		exitErrorf("Unable to download file, %v", err)
+// 	}
 
-	// Process the retrieved object
-	fmt.Println("Retrieved object:", output.Body)
-}
+// 	// Process the retrieved object
+// 	fmt.Println("Retrieved object:", output.Body)
+// }
