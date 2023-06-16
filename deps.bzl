@@ -1,4 +1,5 @@
 load("@bazel_gazelle//:deps.bzl", "go_repository")
+# gazelle:go_visibility //visibility:public
 
 def go_dependencies():
     go_repository(
