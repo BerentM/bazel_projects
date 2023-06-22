@@ -74,7 +74,7 @@ func (c *S3Client) Upload(byteFile []byte, uniqueID string) {
 	}
 
 	// Create an uploader with S3 client and default options
-	result, err := c.Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = c.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: &c.Bucket,
 		Key:    &uniqueID,
 		Body:   bytes.NewReader(byteFile),
@@ -83,9 +83,6 @@ func (c *S3Client) Upload(byteFile []byte, uniqueID string) {
 		log.Printf("Couldn't upload file to %v:%v. Here's why: %v\n",
 			c.Bucket, uniqueID, err)
 	}
-
-	// Perform an upload.
-	fmt.Println(result)
 }
 
 // Download get ObjectData from S3

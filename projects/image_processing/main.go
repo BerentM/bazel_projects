@@ -16,7 +16,7 @@ func processLocalFiles(w http.ResponseWriter, _ *http.Request) {
 	var images [][]byte
 
 	paths := []string{"projects/image_processing/images/test_image.png"}
-	imgProcessor := NewImageProcessor(0.9)
+	imgProcessor := NewImageProcessor(1)
 	S3Client := NewS3Client("dtmx-images")
 
 	for _, path := range paths {
@@ -46,7 +46,7 @@ func loadImage(_ http.ResponseWriter, r *http.Request) (multipart.File, error) {
 
 // processHTTPFile it requires that request Method is POST and file key is "file"
 func processHTTPFile(w http.ResponseWriter, r *http.Request) {
-	imgProcessor := NewImageProcessor(0.9)
+	imgProcessor := NewImageProcessor(1)
 	S3Client := NewS3Client("dtmx-images")
 
 	file, err := loadImage(w, r)
