@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
@@ -17,52 +16,49 @@ func exitErrorf(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
-// AwsHelper wapper around AWS S3 operations
-type AwsHelper struct {
-	Region             string `yaml:"Region"`
-	Bucket             string `yaml:"Bucket"`
-	CredentialsProfile string `yaml:"CredentialsProfile"`
-	Config             aws.Config
+// S3Client wapper around AWS S3 operations
+type S3Client struct {
+	Region string `yaml:"Region"`
+	Bucket string `yaml:"Bucket"`
+	Client *s3.Client
 }
 
-// New initialize AWS session
-func (ah *AwsHelper) New() {
-	ah.Region = "eu-central-1"
-	ah.Bucket = "dtmx-images-poc"
-	ah.CredentialsProfile = "dtmx-images"
+// NewS3Client create new S3 client
+func NewS3Client(credProfile string) *S3Client {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithSharedConfigProfile(ah.CredentialsProfile),
+		config.WithSharedConfigProfile(credProfile),
 	)
 	if err != nil {
 		exitErrorf("Unable to load credentials, %v", err)
 	}
-	ah.Config = cfg
+
+	return &S3Client{
+		Region: "eu-central-1",
+		Bucket: "dtmx-images-poc",
+		Client: s3.NewFromConfig(cfg),
+	}
 }
 
 // CheckBuckets list all buckets
-func (ah *AwsHelper) CheckBuckets() {
-	// Create S3 service client
-	svc := s3.NewFromConfig(ah.Config)
-
-	result, err := svc.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+func (c *S3Client) CheckBuckets() {
+	result, err := c.Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
 		exitErrorf("Unable to list buckets, %v", err)
 	}
 
 	fmt.Println("Buckets:")
-
 	for _, b := range result.Buckets {
 		fmt.Printf("* %s created on %s\n",
 			*b.Name, b.CreationDate)
 	}
 }
 
-func (ah *AwsHelper) checkIfFileExists(svc *s3.Client, uniqueID string) (bool, error) {
+func (c *S3Client) checkIfFileExists(uniqueID string) (bool, error) {
 	input := &s3.HeadObjectInput{
-		Bucket: &ah.Bucket,
+		Bucket: &c.Bucket,
 		Key:    &uniqueID,
 	}
-	_, err := svc.HeadObject(context.TODO(), input)
+	_, err := c.Client.HeadObject(context.TODO(), input)
 	if err != nil {
 		return false, nil
 	}
@@ -70,40 +66,38 @@ func (ah *AwsHelper) checkIfFileExists(svc *s3.Client, uniqueID string) (bool, e
 }
 
 // Upload the object to S3 using the unique identifier as the key
-func (ah *AwsHelper) Upload(byteFile []byte, uniqueID string) {
-	svc := s3.NewFromConfig(ah.Config)
-	exist, err := ah.checkIfFileExists(svc, uniqueID)
+func (c *S3Client) Upload(byteFile []byte, uniqueID string) {
+	exist, err := c.checkIfFileExists(uniqueID)
 	if exist {
 		fmt.Println("File already exist in S3")
 		return
 	}
 
 	// Create an uploader with S3 client and default options
-	result, err := svc.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: &ah.Bucket,
+	result, err := c.Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &c.Bucket,
 		Key:    &uniqueID,
 		Body:   bytes.NewReader(byteFile),
 	})
 	if err != nil {
 		log.Printf("Couldn't upload file to %v:%v. Here's why: %v\n",
-			ah.Bucket, uniqueID, err)
+			c.Bucket, uniqueID, err)
 	}
 
 	// Perform an upload.
 	fmt.Println(result)
 }
 
-// // Download get ObjectData from S3
-// func (ah *AwsHelper) Download(uniqueID string) {
-// 	svc := s3.New(ah.Session)
-// 	output, err := svc.GetObject(&s3.GetObjectInput{
-// 		Bucket: ah.Bucket,
-// 		Key:    uniqueID,
-// 	})
-// 	if err != nil {
-// 		exitErrorf("Unable to download file, %v", err)
-// 	}
+// Download get ObjectData from S3
+func (c *S3Client) Download(uniqueID string) {
+	output, err := c.Client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &c.Bucket,
+		Key:    &uniqueID,
+	})
+	if err != nil {
+		exitErrorf("Unable to download file, %v", err)
+	}
 
-// 	// Process the retrieved object
-// 	fmt.Println("Retrieved object:", output.Body)
-// }
+	// Process the retrieved object
+	fmt.Println("Retrieved object:", output.Body)
+}

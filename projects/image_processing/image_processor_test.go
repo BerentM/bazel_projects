@@ -8,7 +8,7 @@ import (
 )
 
 func TestFileRead(t *testing.T) {
-	p := ImageProcessor{}
+	p := NewImageProcessor(1)
 	expected := 45190
 	actual, err := p.readFile("images/test_image.png")
 	if err != nil {
@@ -20,7 +20,7 @@ func TestFileRead(t *testing.T) {
 }
 
 func TestUniqueID(t *testing.T) {
-	p := ImageProcessor{}
+	p := NewImageProcessor(1)
 	bytes, err := p.readFile("images/test_image.png")
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestUniqueID(t *testing.T) {
 }
 
 func TestImgToGrid(t *testing.T) {
-	p := ImageProcessor{}
+	p := NewImageProcessor(1)
 	data, err := p.readFile("images/test_image.png")
 	img, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
@@ -55,7 +55,7 @@ func TestImgToGrid(t *testing.T) {
 }
 
 func TestDownscale(t *testing.T) {
-	p := ImageProcessor{scale: 0.9}
+	p := NewImageProcessor(0.9)
 	expected := 25330
 	input, err := p.readFile("images/test_image.png")
 	if err != nil {

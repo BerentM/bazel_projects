@@ -21,9 +21,11 @@ type ImageProcessor struct {
 	uniqueID string
 }
 
-// New Initialize new image processor
-func (p *ImageProcessor) New(scale float64) {
-	p.scale = scale
+// NewImageProcessor Initialize new image processor
+func NewImageProcessor(scale float64) *ImageProcessor {
+	return &ImageProcessor{
+		scale: scale,
+	}
 }
 
 func (p *ImageProcessor) resize(grid [][]color.Color) [][]color.Color {

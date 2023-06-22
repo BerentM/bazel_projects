@@ -15,11 +15,9 @@ func greet(w http.ResponseWriter, _ *http.Request) {
 func processLocalFiles(w http.ResponseWriter, _ *http.Request) {
 	var images [][]byte
 
-	aws := AwsHelper{}
-	aws.New()
-
 	paths := []string{"projects/image_processing/images/test_image.png"}
-	imgProcessor := ImageProcessor{scale: 0.9}
+	imgProcessor := NewImageProcessor(0.9)
+	S3Client := NewS3Client("dtmx-images")
 
 	for _, path := range paths {
 		data, err := imgProcessor.readFile(path)
@@ -32,7 +30,7 @@ func processLocalFiles(w http.ResponseWriter, _ *http.Request) {
 
 	for _, img := range images {
 		imgProcessor.Process(img)
-		aws.Upload(imgProcessor.img, imgProcessor.uniqueID)
+		S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID)
 	}
 	fmt.Fprintf(w, "Last processed img UniqueID: %v", imgProcessor.uniqueID)
 }
@@ -48,9 +46,8 @@ func loadImage(_ http.ResponseWriter, r *http.Request) (multipart.File, error) {
 
 // processHTTPFile it requires that request Method is POST and file key is "file"
 func processHTTPFile(w http.ResponseWriter, r *http.Request) {
-	imgProcessor := ImageProcessor{scale: 0.9}
-	aws := AwsHelper{}
-	aws.New()
+	imgProcessor := NewImageProcessor(0.9)
+	S3Client := NewS3Client("dtmx-images")
 
 	file, err := loadImage(w, r)
 	if err != nil {
@@ -59,7 +56,7 @@ func processHTTPFile(w http.ResponseWriter, r *http.Request) {
 	}
 	img, _ := io.ReadAll(file)
 	imgProcessor.Process(img)
-	aws.Upload(imgProcessor.img, imgProcessor.uniqueID)
+	S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID)
 	fmt.Fprintf(w, "Last processed img UniqueID: %v", imgProcessor.uniqueID)
 }
 
