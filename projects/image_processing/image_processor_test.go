@@ -69,3 +69,37 @@ func TestDownscale(t *testing.T) {
 		t.Fatalf("%v != %v", expected, len(actual))
 	}
 }
+
+func TestScaleCalculate(t *testing.T) {
+	p := NewImageProcessor(1)
+	bytes := make([]byte, 1)
+	actual := p.calculateDownscaleRate(bytes, 200)
+	expected := float64(1)
+	if expected != actual {
+		t.Fatalf("wrong result scale in TestScaleCalculate %v != %v", expected, actual)
+	}
+	bytes = make([]byte, 101)
+	actual = p.calculateDownscaleRate(bytes, 100)
+	expected = 0.9900990099009901
+	if expected != actual {
+		t.Fatalf("wrong result scale in TestScaleCalculate %v != %v", expected, actual)
+	}
+	bytes = make([]byte, 400)
+	actual = p.calculateDownscaleRate(bytes, 200)
+	expected = 0.5
+	if expected != actual {
+		t.Fatalf("wrong result scale in TestScaleCalculate %v != %v", expected, actual)
+	}
+	bytes = make([]byte, 300)
+	actual = p.calculateDownscaleRate(bytes, 100)
+	expected = 0.3333333333333333
+	if expected != actual {
+		t.Fatalf("wrong result scale in TestScaleCalculate %v != %v", expected, actual)
+	}
+	bytes = make([]byte, 400)
+	actual = p.calculateDownscaleRate(bytes, 100)
+	expected = 0.25
+	if expected != actual {
+		t.Fatalf("wrong result scale in TestScaleCalculate %v != %v", expected, actual)
+	}
+}

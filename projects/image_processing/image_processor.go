@@ -89,6 +89,7 @@ func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 
 // Process downscale and generateUniqueID for passed image
 func (p *ImageProcessor) Process(img []byte) {
+	p.scale = p.calculateDownscaleRate(img, 2000000) // 2MB limit
 	data, err := p.DownscaleImage(img)
 	if err != nil {
 		log.Fatal(err)
@@ -125,4 +126,16 @@ func (p *ImageProcessor) generateUniqueID(bytes []byte) string {
 	uniqueID := hex.EncodeToString(hash.Sum(nil)[:])
 	p.uniqueID = uniqueID
 	return uniqueID
+}
+
+// calculateDownscaleRate calculate how much []byte exceed byteSizeLimit
+func (p *ImageProcessor) calculateDownscaleRate(bytes []byte, byteSizeLimit float64) float64 {
+	c := float64(cap(bytes))
+	if c <= byteSizeLimit {
+		// Don't downscale image if its size is smaller than limit
+		return float64(1)
+	}
+	scale := 1 / (c / byteSizeLimit)
+	fmt.Printf("%.8f\n", scale)
+	return scale
 }
