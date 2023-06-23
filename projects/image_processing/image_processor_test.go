@@ -106,7 +106,7 @@ func TestScaleCalculate(t *testing.T) {
 
 func TestThumbnailGeneration(t *testing.T) {
 	p := NewImageProcessor(1)
-	expected := "af0382d71d65b5b9db0121cad3af3f3869e93a2c8d1ae01463ebd65ec3e7d5f1"
+	expected := "90cef78839c72eca810b656237e49860803a0b5c8ac290b9d9b1d0072452241f"
 	data, err := p.readFile("images/test_image.png")
 	if err != nil {
 		t.Fatal(err)

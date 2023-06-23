@@ -45,20 +45,21 @@ func (p *ImageProcessor) resize(grid [][]color.Color) [][]color.Color {
 	return resized
 }
 
-func (p *ImageProcessor) miniaturization(xlen, ylen int, grid [][]color.Color) [][]color.Color {
-	xscale := float64(xlen) / float64(len(grid))
-	yscale := float64(ylen) / float64(len(grid[0]))
+func (p *ImageProcessor) miniaturization(maxLength float64, grid [][]color.Color) [][]color.Color {
+	scale := maxLength / math.Max(float64(len(grid)), float64(len(grid[0])))
+	xlen, ylen := int(float64(len(grid))*scale), int(float64(len(grid[0]))*scale)
 	resized := make([][]color.Color, xlen)
 	for i := 0; i < len(resized); i++ {
 		resized[i] = make([]color.Color, ylen)
 	}
 	for x := 0; x < xlen; x++ {
 		for y := 0; y < ylen; y++ {
-			xp := int(math.Floor(float64(x) / xscale))
-			yp := int(math.Floor(float64(y) / yscale))
+			xp := int(math.Floor(float64(x) / scale))
+			yp := int(math.Floor(float64(y) / scale))
 			resized[x][y] = grid[xp][yp]
 		}
 	}
+	fmt.Println("xlen: ", xlen, " ylen: ", ylen)
 	return resized
 }
 
@@ -112,7 +113,7 @@ func (p *ImageProcessor) GenerateThumbnail(data []byte) ([]byte, error) {
 		log.Fatal(err)
 	}
 	grid := p.imageToGrid(img)
-	resized := p.miniaturization(128, 128, grid)
+	resized := p.miniaturization(128, grid)
 	bytes, err := p.gridToBytes(resized)
 	p.thumbnail = bytes
 	return bytes, err
