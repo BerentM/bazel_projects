@@ -1,4 +1,4 @@
-## USEFULL COMMANDS
+## USEFUL COMMANDS
 
 1. update deps, -from_file need point to go.mod file
 ```bazel run //:gazelle -- update-repos -from_file=projects/image_processing/go.mod -to_macro=deps.bzl%go_dependencies```
@@ -8,7 +8,8 @@
 ```bazel test //...```
 4. build projects
 ```bazel build //...```
-
+5. in case of problems!
+```bazel clean --expunge```
 
 
 ## BAZEL / GAZELLE

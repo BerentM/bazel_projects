@@ -117,3 +117,19 @@ func TestThumbnailGeneration(t *testing.T) {
 		t.Fatalf("GenerateThumbnail: %v != %v", expected, actual)
 	}
 }
+
+func TestThumbnailProportions(t *testing.T) {
+	p := NewImageProcessor(1)
+	data, err := p.readFile("images/test_image.png")
+	img, err := png.Decode(bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	grid := p.imageToGrid(img)
+	resized := p.miniaturization(128, grid)
+	expected := [2]int{128, 40}
+	actual := [2]int{len(resized), len(resized[0])}
+	if expected[0] != actual[0] || expected[1] != actual[1] {
+		t.Fatalf("wrong thumbnail proportions: %v != %v (x), or %v != %v (y)", expected[0], actual[0], expected[1], actual[1])
+	}
+}
