@@ -16,9 +16,10 @@ import (
 
 // ImageProcessor object hashing
 type ImageProcessor struct {
-	img      []byte
-	scale    float64
-	uniqueID string
+	img       []byte
+	thumbnail []byte
+	scale     float64
+	uniqueID  string
 }
 
 // NewImageProcessor Initialize new image processor
@@ -38,6 +39,23 @@ func (p *ImageProcessor) resize(grid [][]color.Color) [][]color.Color {
 		for y := 0; y < ylen; y++ {
 			xp := int(math.Floor(float64(x) / p.scale))
 			yp := int(math.Floor(float64(y) / p.scale))
+			resized[x][y] = grid[xp][yp]
+		}
+	}
+	return resized
+}
+
+func (p *ImageProcessor) miniaturization(xlen, ylen int, grid [][]color.Color) [][]color.Color {
+	xscale := float64(xlen) / float64(len(grid))
+	yscale := float64(ylen) / float64(len(grid[0]))
+	resized := make([][]color.Color, xlen)
+	for i := 0; i < len(resized); i++ {
+		resized[i] = make([]color.Color, ylen)
+	}
+	for x := 0; x < xlen; x++ {
+		for y := 0; y < ylen; y++ {
+			xp := int(math.Floor(float64(x) / xscale))
+			yp := int(math.Floor(float64(y) / yscale))
 			resized[x][y] = grid[xp][yp]
 		}
 	}
@@ -73,7 +91,7 @@ func (p *ImageProcessor) imageToGrid(img image.Image) [][]color.Color {
 	return grid
 }
 
-// DownscaleImage reduce resolution of the Image
+// DownscaleImage reduce resolution of the image
 // based on https://go-recipes.dev/more-working-with-images-in-go-30b11ab2a9f0
 func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 	img, err := png.Decode(bytes.NewReader(data))
@@ -87,16 +105,31 @@ func (p *ImageProcessor) DownscaleImage(data []byte) ([]byte, error) {
 	return bytes, err
 }
 
-// Process downscale and generateUniqueID for passed image
-func (p *ImageProcessor) Process(img []byte) {
-	p.scale = p.calculateDownscaleRate(img, 2000000) // 2MB limit
-	data, err := p.DownscaleImage(img)
+// GenerateThumbnail create thumbnail from image
+func (p *ImageProcessor) GenerateThumbnail(data []byte) ([]byte, error) {
+	img, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
 		log.Fatal(err)
 	}
-	p.generateUniqueID(data)
-	p.img = data
-	fmt.Println(p.uniqueID)
+	grid := p.imageToGrid(img)
+	resized := p.miniaturization(128, 128, grid)
+	bytes, err := p.gridToBytes(resized)
+	p.thumbnail = bytes
+	return bytes, err
+}
+
+// Process downscale and generateUniqueID for passed image
+func (p *ImageProcessor) Process(img []byte) {
+	p.scale = p.calculateDownscaleRate(img, 2000000) // 2MB limit
+	_, err := p.GenerateThumbnail(img)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = p.DownscaleImage(img)
+	if err != nil {
+		log.Fatal(err)
+	}
+	p.generateUniqueID(p.img)
 }
 
 func (p *ImageProcessor) readFile(path string) ([]byte, error) {
