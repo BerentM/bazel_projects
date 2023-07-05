@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+gazelle(name = "gazelle")
+
+go_library(
+    name = "lib",
+    srcs = [ "main.go" ],
+    importpath = "projects/image_downscale",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_davidbyttow_govips_v2//vips:go_default_library"],
+)
+
+go_binary(
+    name = "image_downscale",
+    embed = [":lib"],
+    visibility = ["//visibility:public"],
+)

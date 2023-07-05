@@ -30,8 +30,8 @@ func processLocalFiles(w http.ResponseWriter, _ *http.Request) {
 
 	for _, img := range images {
 		imgProcessor.Process(img)
-		go S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID)
-		go S3Client.Upload(imgProcessor.thumbnail, imgProcessor.uniqueID+"_128")
+		go S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID, "image/png")
+		go S3Client.Upload(imgProcessor.thumbnail, imgProcessor.uniqueID+"_128", "image/png")
 	}
 	fmt.Fprintf(w, "Last processed img UniqueID: %v", imgProcessor.uniqueID)
 }
@@ -57,8 +57,8 @@ func processHTTPFile(w http.ResponseWriter, r *http.Request) {
 	}
 	img, _ := io.ReadAll(file)
 	imgProcessor.Process(img)
-	go S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID)
-	go S3Client.Upload(imgProcessor.thumbnail, imgProcessor.uniqueID+"_128")
+	go S3Client.Upload(imgProcessor.img, imgProcessor.uniqueID, "image/png")
+	go S3Client.Upload(imgProcessor.thumbnail, imgProcessor.uniqueID+"_128", "image/png")
 	fmt.Fprintf(w, "Last processed img UniqueID: %v", imgProcessor.uniqueID)
 }
 

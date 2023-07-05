@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
@@ -66,7 +67,7 @@ func (c *S3Client) checkIfFileExists(uniqueID string) (bool, error) {
 }
 
 // Upload the object to S3 using the unique identifier as the key
-func (c *S3Client) Upload(byteFile []byte, uniqueID string) {
+func (c *S3Client) Upload(byteFile []byte, uniqueID string, contentType string) {
 	exist, err := c.checkIfFileExists(uniqueID)
 	if exist {
 		fmt.Println("File already exist in S3")
@@ -75,9 +76,10 @@ func (c *S3Client) Upload(byteFile []byte, uniqueID string) {
 
 	// Create an uploader with S3 client and default options
 	_, err = c.Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: &c.Bucket,
-		Key:    &uniqueID,
-		Body:   bytes.NewReader(byteFile),
+		Bucket:      &c.Bucket,
+		Key:         &uniqueID,
+		Body:        bytes.NewReader(byteFile),
+		ContentType: aws.String(contentType),
 	})
 	if err != nil {
 		log.Printf("Couldn't upload file to %v:%v. Here's why: %v\n",
