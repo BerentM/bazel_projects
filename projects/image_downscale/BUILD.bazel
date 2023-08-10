@@ -5,10 +5,10 @@ gazelle(name = "gazelle")
 
 go_library(
     name = "lib",
-    srcs = [ "main.go" ],
+    srcs = ["main.go"],
     importpath = "projects/image_downscale",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_davidbyttow_govips_v2//vips:go_default_library"],
+    deps = ["@com_github_davidbyttow_govips_v2//vips"],
 )
 
 go_binary(

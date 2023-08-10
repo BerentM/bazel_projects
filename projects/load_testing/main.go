@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
+	"io"
 	myproto "load_testing/proto"
 	"log"
+	"net/http"
+	"strconv"
 
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -115,8 +119,35 @@ func main() {
 		}
 	}
 
-	for i, request := range requests {
-		// TODO: Do something with that request
-		fmt.Println(i, request)
+	// conn, err := grpc.Dial("localhost:54000", grpc.WithInsecure())
+	// if err != nil {
+	// 	log.Fatalf("failed to connect: %v", err)
+	// }
+	// defer conn.Close()
+	payload := requests[0]
+	fmt.Println(payload)
+	req, err := http.NewRequest("POST", "http://localhost:54000/events.proto.v1.EventService/PostEventReq", bytes.NewBuffer(payload))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
 	}
+
+	req.Header.Set("Content-Type", "application/grpc")
+	req.Header.Set("Content-Length", strconv.Itoa(len(payload)))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("failed to read response: %v", err)
+	}
+	fmt.Println(body)
+
+	// for i, request := range requests {
+	// 	// TODO: Do something with that request
+	// 	fmt.Println(i, request)
+	// }
 }

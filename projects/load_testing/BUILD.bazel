@@ -6,6 +6,7 @@ go_library(
     importpath = "projects/load_testing",
     visibility = ["//visibility:private"],
     deps = [
+        "//projects/load_testing/proto:myproto_go_proto",
         "@com_github_lib_pq//:pq",
         "@org_golang_google_protobuf//encoding/protojson",
         "@org_golang_google_protobuf//proto",

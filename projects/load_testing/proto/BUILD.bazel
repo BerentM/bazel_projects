@@ -10,7 +10,7 @@ proto_library(
 
 go_proto_library(
     name = "myproto_go_proto",
-    importpath = "/proto",
+    importpath = "projects/load_testing/proto",
     proto = ":myproto_proto",
     visibility = ["//visibility:public"],
 )
@@ -18,6 +18,6 @@ go_proto_library(
 go_library(
     name = "proto",
     embed = [":myproto_go_proto"],
-    importpath = "/proto",
+    importpath = "projects/load_testing/proto",
     visibility = ["//visibility:public"],
 )
