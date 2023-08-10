@@ -61,3 +61,16 @@ bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dep
 ```
 
 based on: https://medium.com/@simontoth/golang-with-bazel-2b5310d4ce48
+
+
+Some projects depends on protobuff. To regenarate it run:
+`protoc --go_out=. ./proto/myproto.proto`
+
+to install required dependecies run:
+```
+go get -u github.com/golang/protobuf/protoc-gen-go
+brew install protobuf
+brew link protobuf
+brew install protoc-gen-go
+```
+

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "/proto;myproto";
+
+message EventType {
+  string v_event_type = 1;
+}
+
+message BrowsingEvent {
+    bool            active          =  1;
+    bool            audible         =  2;
+    bool            autoDiscardable =  3;
+    bool            discarded       =  4;
+    double          duration        =  5;
+    string          favIconUrl      =  6;
+    double          height          =  7;
+    bool            highlighted     =  8;
+    int64           id              =  9;
+    bool            incognito       = 10;
+    int64           index           = 11;
+    int64           openerTabId     = 12;
+    bool            pinned          = 13;
+    string          seccode         = 14;
+    bool            selected        = 15;
+    string          status          = 16;
+    string          sub1            = 17;
+    string          title           = 18;
+    string          tld             = 19;
+    string          url             = 20;
+    string          userId          = 21;
+    double          width           = 22;
+    int64           windowId        = 23;
+
+    MutedInfo mutedInfo             = 24;
+    int64 groupId                   = 25;
+    string pendingUrl               = 26;
+}
+
+message MutedInfo {
+    bool            muted           =  1;
+}
+
+message TargetElement {
+    string          tag              = 1;
+    string          id               = 2;
+    string          class            = 3;
+    string          type             = 4;
+}
+
+
+message ClickEvent {
+    uint32            tabId             = 1;
+    int64             timestamp         = 2;
+    TargetElement     target            = 11;
+    repeated string   path              = 12;
+    bool              isTrusted         = 13;
+    string            pageUrl           = 14;
+}

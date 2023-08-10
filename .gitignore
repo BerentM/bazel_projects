@@ -2,3 +2,4 @@ bazel-*
 .DS-Store
 projects/image_processing/images/output*
 projects/image_processing/image_processing
+projects/load_testing/pkg/mod
