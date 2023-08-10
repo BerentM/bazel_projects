@@ -122,12 +122,18 @@ def go_dependencies():
         sum = "h1:5MK9ZcXZC5GzUR9Ca8fJwOYqMgll/H096ec0PJP59QM=",
         version = "v2.13.0",
     )
+    go_repository(
+        name = "com_github_golang_protobuf",
+        importpath = "github.com/golang/protobuf",
+        sum = "h1:LUVKkCeviFUMKqHa4tXIIij/lbhnMbP7Fn5wKdKkRh4=",
+        version = "v1.5.0",
+    )
 
     go_repository(
         name = "com_github_google_go_cmp",
         importpath = "github.com/google/go-cmp",
-        sum = "h1:e6P7q2lk1O+qJJb4BtCQXlK8vWEO8V1ZeuEdJNOqZyg=",
-        version = "v0.5.8",
+        sum = "h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=",
+        version = "v0.5.9",
     )
     go_repository(
         name = "com_github_jmespath_go_jmespath",
@@ -153,6 +159,13 @@ def go_dependencies():
         sum = "h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=",
         version = "v0.1.0",
     )
+    go_repository(
+        name = "com_github_lib_pq",
+        importpath = "github.com/lib/pq",
+        sum = "h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=",
+        version = "v1.10.9",
+    )
+
     go_repository(
         name = "com_github_niemeyer_pretty",
         importpath = "github.com/niemeyer/pretty",
@@ -203,6 +216,13 @@ def go_dependencies():
         sum = "h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=",
         version = "v3.0.0-20200313102051-9f266ea9e77c",
     )
+    go_repository(
+        name = "org_golang_google_protobuf",
+        importpath = "google.golang.org/protobuf",
+        sum = "h1:g0LDEJHgrBl9N9r17Ru3sqWhkIx2NB67okBHPwC7hs8=",
+        version = "v1.31.0",
+    )
+
     go_repository(
         name = "org_golang_x_crypto",
         importpath = "golang.org/x/crypto",
@@ -260,6 +280,6 @@ def go_dependencies():
     go_repository(
         name = "org_golang_x_xerrors",
         importpath = "golang.org/x/xerrors",
-        sum = "h1:9zdDQZ7Thm29KFXgAX/+yaf3eVbP7djjWp/dXAppNCc=",
-        version = "v0.0.0-20190717185122-a985d3407aa7",
+        sum = "h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=",
+        version = "v0.0.0-20191204190536-9bdfabe68543",
     )
